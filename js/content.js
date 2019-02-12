@@ -48,7 +48,9 @@ init()
     })
 
     .catch((e) => {
-        console.log(`--- ERROR CAUGHT ---`);
-        console.log(e.message);
-        console.log(`---`);
+        console.log(`
+        --- ERROR CAUGHT ---
+        ${e.message}
+        ---
+        `);
     });
