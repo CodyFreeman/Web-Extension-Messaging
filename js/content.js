@@ -1,17 +1,16 @@
 // Gets tab id for future use
 function init() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         browser.runtime.sendMessage({ type: `ID` }, (response) => {
-            resolve(response.payload);
+            resolve(response.payload.data);
         });
     })
 }
 
 // Controller to deal with responses from the background script
-function responseController(port, response) {
+function responseController(response) {
     if (!response || !response.type) {
-        console.log(`error in resonse: `, response);
-        throw new Error(`invalid response: ${response.type} - ${response}`);
+        console.error(`invalid response: ${response.type} - ${response}`);
     }
 
     // Logic depending on response type
@@ -28,27 +27,25 @@ function responseController(port, response) {
 
 /* BOOTSTRAPPING */
 init()
-    .then((id) => {
-        // Store Tab ID as tab cannot identify itself.
-        const tabId = id;
+    .then((tabId) => {
 
         // Creating port to background script
         const port = browser.runtime.connect();
 
         // Creating listener on port
         port.onMessage.addListener((response) => {
-            responseController(port, response);
+            responseController(response);
         });
 
+        // TODO: Better example
         if (tabId % 2) {
             port.postMessage({ origin: tabId, type: `SAY_HELLO` });
         } else {
             port.postMessage({ origin: tabId, type: `LAST_HELLO` });
         }
     })
-
     .catch((e) => {
-        console.log(`
+        console.error(`
         --- ERROR CAUGHT ---
         ${e.message}
         ---

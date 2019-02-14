@@ -1,30 +1,20 @@
-/* REPO */
-function save(field, data) {
-    localStorage.setItem(field, data);
-}
-
-function load(field) {
-    return localStorage.getItem(field);
-}
-
 /* MESSAGING */
 function requestController(port, request, sender) {
 
     if (!request || !request.type) {
-        console.log(`error in request: `, request);
-        throw new Error(`invalid request: ${request.type} - ${request}`);
+        console.error(`invalid request: ${request.type} - ${request}`);
     }
 
     switch (request.type) {
 
         case `SAY_HELLO`:
-            currentTime = Date.now() / 1000;
-            save(`hello`, currentTime);
+        const currentTime = Date.now() / 1000;
+            localStorage.setItem(`lastHello`, currentTime);
             port.postMessage(createResponse(`SAY_HELLO_RESPONSE`, createPayload(currentTime)));
             break;
 
         case `LAST_HELLO`:
-            port.postMessage(createResponse(`LAST_HELLO_RESPONSE`, createPayload(load(`hello`))));
+            port.postMessage(createResponse(`LAST_HELLO_RESPONSE`, createPayload(localStorage.getItem(`lastHello`))));
             break;
     }
 }
@@ -51,7 +41,7 @@ function createPayload(data = { data: null }) {
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.type) {
         case `ID`:
-            sendResponse(createResponse(`ID_RESPONSE`, sender.tab.id));
+            sendResponse(createResponse(`ID_RESPONSE`, createPayload(sender.tab.id)));
             break;
     }
 });
